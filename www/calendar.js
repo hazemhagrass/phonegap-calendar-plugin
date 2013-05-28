@@ -50,23 +50,20 @@ cordova.define('cordova/plugin/calendar', function(require, exports, module) {
    *     of this method.
    */
   Calendar.prototype.findEvents = function(success, opt_error, opt_options) {
-
     // If cordova is not ready, wait for it.
-    if (!cordova.exec) {
+    if (!cordova.exec)
       ws.log('cordova is not yet ready in Calendar findEvents');
-      document.addEventListener('deviceready', _.bind(function() {
-        this.findEvents(success, opt_error, opt_options);
-      }, this), false);
-      return;
-    }
 
-    var filter = opt_options && opt_options.filter || {};
+    var filter = opt_options != null ? opt_options : {};
     // Default limit to 3 days from now.
     var now = new Date();
     var later = new Date();
     later.setDate(now.getDate() + 3);
-    filter.startAfter || (filter.startAfter = now.getTime());
-    filter.startBefore || (filter.startBefore = later.getTime());
+
+    filter.from = filter.from != undefined ? filter.from :now.getTime();
+    filter.to = filter.to != undefined ? filter.to :to.getTime();
+    filter.summary = filter.summary != undefined ? filter.summary :'';
+    
     cordova.exec(success, opt_error, 'Calendar', null, [filter]);
   };
 

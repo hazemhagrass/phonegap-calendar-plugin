@@ -31,7 +31,7 @@ cordova.require('cordova/plugin/calendar').findEvents(function(events) {
 }, function() {
   // There's an error for some reason.
 }, {
-  'summary': 'Test',
+  'summary': 'Test'
   'startAfter': new Date().getTime(),
   'startBefore': later.getTime()
 });
