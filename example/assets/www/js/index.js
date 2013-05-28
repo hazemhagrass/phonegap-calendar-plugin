@@ -13,7 +13,8 @@ $(function(){
 			});
 		}, function() {
 			alert('Error');
-		}, {
+		}, { 
+			'summary': 'Test',
 			'from': new Date(1970, 1, 1).getTime(),
 			'to': new Date().getTime()
 		});	

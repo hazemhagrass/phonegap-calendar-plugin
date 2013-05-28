@@ -81,15 +81,17 @@ public class Calendar extends Plugin {
     if (args.length() > 0) {
       long startFrom = 0;
       long startTo = 0;
+      String summary = "";
       try {
         JSONObject jsonFilter = args.getJSONObject(0);
         startFrom = jsonFilter.optLong("from");
         startTo = jsonFilter.optLong("to");
+        summary = jsonFilter.optString("summary");
       } catch (JSONException e) {
         return new PluginResult(PluginResult.Status.ERROR);
       }
       JSONArray jsonEvents = getCalendarAccessor().findEvents(
-          startFrom, startTo);
+          summary, startFrom, startTo);
       result = new PluginResult(PluginResult.Status.OK, jsonEvents);
     } else {
       result = new PluginResult(PluginResult.Status.ERROR);

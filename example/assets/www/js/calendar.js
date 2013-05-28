@@ -62,6 +62,7 @@ cordova.define('cordova/plugin/calendar', function(require, exports, module) {
 
     filter.from = filter.from != undefined ? filter.from :now.getTime();
     filter.to = filter.to != undefined ? filter.to :to.getTime();
+    filter.summary = filter.summary != undefined ? filter.summary :'';
     
     cordova.exec(success, opt_error, 'Calendar', null, [filter]);
   };
