@@ -14,9 +14,9 @@ var Calendar = {
         }]
         );
     else
-      cordova.exec(successCallback,errorCallback,"CalendarPlugin","createEvent", [title,location,notes,startDate,endDate]);
+      cordova.exec(successCallback,errorCallback,"Calendar","createEvent", [title,location,notes,startDate.getTime(),endDate.getTime()]);
   },
-  findEvents: function(title, location, notes, startDate, endDate, successCallback, errorCallback) {
+  findEvents: function(startDate, endDate, successCallback, errorCallback) {
     if (device.platform == "Android")
       cordova.exec(successCallback, errorCallback, 'CalendarPlugin', 'findFromCalendar', [{
         "startTimeMillis": startDate.getTime(),
@@ -24,7 +24,7 @@ var Calendar = {
       }]
       );
     else
-      cordova.exec(successCallback,errorCallback,"CalendarPlugin","findEvent", [title,location,notes,startDate,endDate]);
+      cordova.exec(successCallback,errorCallback,"Calendar","findEvent", [title,location,notes,startDate.getTime(),endDate.getTime()]);
   },
   deleteEvent: function(title, successCallback, errorCallback) {
     if (device.platform == "Android")
@@ -33,7 +33,7 @@ var Calendar = {
       }]
       );
     else
-     cordova.exec(successCallback,errorCallback,"CalendarPlugin","deleteEvent", [title,location,notes,startDate,endDate, true]);
+     cordova.exec(successCallback,errorCallback,"Calendar","deleteEvent", [title,location,notes,startDate.getTime(),endDate.getTime(), true]);
  }
 };
 
