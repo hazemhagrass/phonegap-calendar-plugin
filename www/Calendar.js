@@ -3,7 +3,7 @@ var Calendar = {
     cordova.exec(
       successCallback,
       errorCallback,
-      'Calendar',
+      'CalendarPlugin',
       'addToCalendar', [{
         "title": title,
         "description": notes,

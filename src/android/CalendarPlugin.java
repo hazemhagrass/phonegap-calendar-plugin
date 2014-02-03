@@ -43,7 +43,7 @@ import android.util.Log;
 
 import com.badrit.Calendar.AbstractCalendarAccessor;
 import com.badrit.Calendar.CalendarProviderAccessor;
-import ccom.badrit.Calendar.LegacyCalendarAccessor;
+import com.badrit.Calendar.LegacyCalendarAccessor;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
