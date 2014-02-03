@@ -25,77 +25,147 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 /**
  * @author yvonne@twist.com (Yvonne Yip)
  */
 
 package com.twist.android.plugins.calendar;
 
+import java.util.TimeZone;
+
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.CalendarContract;
 import android.util.Log;
 
 import com.twist.android.plugins.calendar.AbstractCalendarAccessor;
 import com.twist.android.plugins.calendar.CalendarProviderAccessor;
 import com.twist.android.plugins.calendar.LegacyCalendarAccessor;
 
-import org.apache.cordova.api.Plugin;
+import org.apache.cordova.api.CallbackContext;
+import org.apache.cordova.api.CordovaPlugin;
 import org.apache.cordova.api.PluginResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static java.lang.String.format;
 
-public class Calendar extends Plugin {
 
-  private static final String LOG_TAG = AbstractCalendarAccessor.LOG_TAG;
+public class Calendar extends CordovaPlugin {
+	public static final String ACTION_ADD_TO_CALENDAR = "addToCalendar";
+	public static final String ACTION_FIND_FROM_CALENDAR = "findFromCalendar";
+	public static final String ACTION_DELETE_FROM_CALENDAR = "deleteFromCalendar";
+	public static final Integer RESULT_CODE_CREATE = 0;
+	public static final Integer RESULT_CODE_FIND = 1;
+	public static final Integer RESULT_CODE_DELETE = 2;
+	private CallbackContext callback;
 
-  private AbstractCalendarAccessor calendarAccessor;
+	private static final String LOG_TAG = AbstractCalendarAccessor.LOG_TAG;
 
-  private AbstractCalendarAccessor getCalendarAccessor() {
-    if (this.calendarAccessor == null) {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-        Log.d(LOG_TAG, "Initializing calendar plugin");
-        this.calendarAccessor = new CalendarProviderAccessor(this.cordova);
-      } else {
-        Log.d(LOG_TAG, "Initializing legacy calendar plugin");
-        this.calendarAccessor = new LegacyCalendarAccessor(this.cordova);
-      }
-    }
-    return this.calendarAccessor;
-  }
+	private AbstractCalendarAccessor calendarAccessor;
+
+	private AbstractCalendarAccessor getCalendarAccessor() {
+		if (this.calendarAccessor == null) {
+			if (Build.VERSION.SDK_INT > Build.VERSION_CODES.GINGERBREAD) {
+				Log.d(LOG_TAG, "Initializing calendar plugin");
+				this.calendarAccessor = new CalendarProviderAccessor(
+					this.cordova);
+			} else {
+				Log.d(LOG_TAG, "Initializing legacy calendar plugin");
+				this.calendarAccessor = new LegacyCalendarAccessor(this.cordova);
+			}
+		}
+		return this.calendarAccessor;
+	}
 
   /**
    * @param action The action to execute.
    * @param args JSONArray of arguments for the plugin.
-   * @param callbackId The callback id used when calling back into JavaScript.
    * @return A PluginResult object with a status and message.
    */
   @Override
-  public PluginResult execute(String action, JSONArray args,
-      String callbackId) {
-    long startMs = System.currentTimeMillis();
-    PluginResult result;
-    if (args.length() > 0) {
-      long startFrom = 0;
-      long startTo = 0;
-      try {
-        JSONObject jsonFilter = args.getJSONObject(0);
-        startFrom = jsonFilter.optLong("startAfter");
-        startTo = jsonFilter.optLong("startBefore");
-      } catch (JSONException e) {
-        return new PluginResult(PluginResult.Status.ERROR);
-      }
-      JSONArray jsonEvents = getCalendarAccessor().findEvents(
-          startFrom, startTo);
-      result = new PluginResult(PluginResult.Status.OK, jsonEvents);
-    } else {
-      result = new PluginResult(PluginResult.Status.ERROR);
-    }
-    Log.d(LOG_TAG, format("query took %d ms", System.currentTimeMillis() -
-        startMs));
-    return result;
+  public boolean execute(String action, JSONArray args,
+  	CallbackContext callbackContext) {
+  	callback = callbackContext;
+  	if (ACTION_ADD_TO_CALENDAR.equals(action)) { 
+  		return createEvent(args);
+  	}else if (ACTION_FIND_FROM_CALENDAR.equals(action)) { 
+  		return findEvents(args);
+  	}
+  	else if (ACTION_DELETE_FROM_CALENDAR.equals(action)) { 
+  		return deleteEvent(args);
+  	}
+  	return false;
   }
+
+  public boolean deleteEvent(JSONArray args) {
+  	if (args.length() == 0) {
+  		System.err.println("Exception: No Arguments passed");
+  	} else {
+  		try {
+  			JSONObject jsonFilter = args.getJSONObject(0);
+  			boolean deleteResult = getCalendarAccessor().deleteEvent(
+  				null, jsonFilter.optString("title"));
+  			PluginResult res = new PluginResult(PluginResult.Status.OK,
+  				deleteResult);
+  			res.setKeepCallback(true);
+  			callback.sendPluginResult(res);
+  			return true;
+  		} catch (JSONException e) {
+  			System.err.println("Exception: " + e.getMessage());
+  		}
+  	}
+  	return false;
+  }
+
+  public boolean findEvents(JSONArray args) {
+  	if (args.length() == 0) {
+  		System.err.println("Exception: No Arguments passed");
+  	}
+  	try {
+  		JSONObject jsonFilter = args.getJSONObject(0);
+  		JSONArray jsonEvents = getCalendarAccessor().findEvents(
+  			jsonFilter.optLong("startTimeMillis"),
+  			jsonFilter.optLong("endTimeMillis"));
+
+  		PluginResult res = new PluginResult(PluginResult.Status.OK,
+  			jsonEvents);
+  		res.setKeepCallback(true);
+  		callback.sendPluginResult(res);
+  		return true;
+
+  	} catch (JSONException e) {
+  		System.err.println("Exception: " + e.getMessage());
+  	}
+  	return false;
+  }
+
+  public boolean createEvent(JSONArray args) {
+  	try {
+  		JSONObject arg_object = args.getJSONObject(0);
+      boolean status = getCalendarAccessor().createEvent(null, arg_object.getString("title"),
+        arg_object.getLong("startTimeMillis"), arg_object.getLong("endTimeMillis"),
+        arg_object.getString("description"), arg_object.getString("eventLocation"));
+      
+      callback.success(status + "");
+      return true;
+    } catch (Exception e) {
+      System.err.println("Exception: " + e.getMessage());
+    }
+    return false;
+  }
+
+  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+  	if (requestCode == RESULT_CODE_CREATE
+  		|| requestCode == RESULT_CODE_FIND
+  		|| requestCode == RESULT_CODE_DELETE) {
+  		callback.success(resultCode + "");
+  } else {
+  	callback.error("Activity result code " + resultCode);
+  }
+}
 }

@@ -30,44 +30,60 @@
  * @author yvonne@twist.com (Yvonne Yip)
  */
 
-cordova.define('cordova/plugin/calendar', function(require, exports, module) {
+ cordova.define('cordova/plugin/calendar', function(require, exports, module) {
   var exec = require('cordova/exec');
 
 
   /**
    * @constructor
    */
-  var Calendar = function() {
+   var Calendar = function() {
+   };
+
+   Calendar.prototype.createEvent = function(title,location,notes,startDate,endDate, successCallback, errorCallback) {
+    if (typeof errorCallback != "function")  {
+      console.log("calendarPlugin.createEvent failure: errorCallback parameter must be a function");
+      return
+    }
+    
+    if (typeof successCallback != "function") {
+      console.log("calendarPlugin.createEvent failure: successCallback parameter must be a function");
+      return
+    }
+    cordova.exec(
+      successCallback, // called when signature capture is successful
+      errorCallback, // called when signature capture encounters an error
+      'Calendar', // Tell cordova that we want to run "PushNotificationPlugin"
+      'addToCalendar', // Tell the plugin the action we want to perform
+      [{
+        "title": title,
+        "description": notes,
+        "eventLocation": location,
+        "startTimeMillis": startDate.getTime(),
+        "endTimeMillis": endDate.getTime()
+      }]
+    ); // List of arguments to the plugin
   };
-
-
   /**
    * Find calendar event items in the calendar based on a CalendarEventFilter
    * object.
-   * @param {Function} success Success callback.
-   * @param {Function=} opt_error Error callback.
+   * @param {Function} successCallback Success callback.
+   * @param {Function=} errorCallback Error callback.
    * @param {CalendarFindOptions=} opt_options Options to apply to the output
    *     of this method.
    */
-  Calendar.prototype.findEvents = function(success, opt_error, opt_options) {
-
-    // If cordova is not ready, wait for it.
-    if (!cordova.exec) {
-      ws.log('cordova is not yet ready in Calendar findEvents');
-      document.addEventListener('deviceready', _.bind(function() {
-        this.findEvents(success, opt_error, opt_options);
-      }, this), false);
-      return;
-    }
-
-    var filter = opt_options && opt_options.filter || {};
-    // Default limit to 3 days from now.
-    var now = new Date();
-    var later = new Date();
-    later.setDate(now.getDate() + 3);
-    filter.startAfter || (filter.startAfter = now.getTime());
-    filter.startBefore || (filter.startBefore = later.getTime());
-    cordova.exec(success, opt_error, 'Calendar', null, [filter]);
+   Calendar.prototype.findEvents = function(startDate, endDate, successCallback, errorCallback, opt_options) {
+    cordova.exec(successCallback, errorCallback, 'Calendar', 'findFromCalendar', [{
+      "startTimeMillis": startDate.getTime(),
+      "endTimeMillis": endDate.getTime()
+    }]
+    );
+  };
+  Calendar.prototype.deleteEvent = function(title, successCallback, errorCallback) {
+    cordova.exec(successCallback, errorCallback, 'Calendar', 'deleteFromCalendar', [{
+      "title": title
+    }]
+    );
   };
 
   var calendar = new Calendar();
