@@ -30,7 +30,7 @@
  * @author yvonne@twist.com (Yvonne Yip)
  */
 
-package com.twist.android.plugins.calendar;
+package com.badrit.Calendar;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -48,7 +48,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.apache.cordova.api.CordovaInterface;
+import org.apache.cordova.CordovaInterface;
 
 import org.json.JSONArray;
 import org.json.JSONException;

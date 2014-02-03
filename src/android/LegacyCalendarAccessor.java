@@ -30,7 +30,7 @@
  * @author yvonne@twist.com (Yvonne Yip)
  */
 
-package com.twist.android.plugins.calendar;
+package com.badrit.Calendar;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -39,11 +39,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
-import com.twist.android.plugins.calendar.AbstractCalendarAccessor;
+import com.badrit.Calendar.AbstractCalendarAccessor;
 
 import java.util.EnumMap;
 
-import org.apache.cordova.api.CordovaInterface;
+import org.apache.cordova.CordovaInterface;
 
 public class LegacyCalendarAccessor extends AbstractCalendarAccessor {
 

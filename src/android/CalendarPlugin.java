@@ -29,7 +29,7 @@
  * @author yvonne@twist.com (Yvonne Yip)
  */
 
-package com.twist.android.plugins.calendar;
+package com.badrit.Calendar;
 
 import java.util.TimeZone;
 
@@ -41,13 +41,13 @@ import android.os.Build;
 import android.provider.CalendarContract;
 import android.util.Log;
 
-import com.twist.android.plugins.calendar.AbstractCalendarAccessor;
-import com.twist.android.plugins.calendar.CalendarProviderAccessor;
-import com.twist.android.plugins.calendar.LegacyCalendarAccessor;
+import com.badrit.Calendar.AbstractCalendarAccessor;
+import com.badrit.Calendar.CalendarProviderAccessor;
+import ccom.badrit.Calendar.LegacyCalendarAccessor;
 
-import org.apache.cordova.api.CallbackContext;
-import org.apache.cordova.api.CordovaPlugin;
-import org.apache.cordova.api.PluginResult;
+import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.PluginResult;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -55,7 +55,7 @@ import org.json.JSONObject;
 
 
 
-public class Calendar extends CordovaPlugin {
+public class CalendarPlugin extends CordovaPlugin {
 	public static final String ACTION_ADD_TO_CALENDAR = "addToCalendar";
 	public static final String ACTION_FIND_FROM_CALENDAR = "findFromCalendar";
 	public static final String ACTION_DELETE_FROM_CALENDAR = "deleteFromCalendar";
