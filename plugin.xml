@@ -8,6 +8,7 @@
   <description>Cordova Calendar Plugin</description>
   <license>Apache 2.0</license>
   <keywords>cordova,Calendar</keywords>
+  <dependency id="org.apache.cordova.device" url="https://github.com/apache/cordova-plugin-device.git" />
   <js-module src="www/Calendar.js" name="Calendar">
     <clobbers target="window.Calendar" />
   </js-module>
@@ -28,4 +29,17 @@
     <source-file src="src/android/LegacyCalendarAccessor.java" target-dir="src/com/badrit/Calendar/" />
     <source-file src="src/android/CalendarProviderAccessor.java" target-dir="src/com/badrit/Calendar/" />
   </platform>
+  <!-- ios -->
+  <platform name="ios">
+   <config-file target="config.xml" parent="/*">
+     <feature name="CalendarPlugin">
+       <param name="ios-package" value="CalendarPlugin" />
+     </feature>
+   </config-file>
+
+   <header-file src="src/ios/CalendarPlugin.h" />
+   <source-file src="src/ios/CalendarPlugin.m" />
+   <framework src="EventKit.framework" />
+   <framework src="EventKitUI.framework" />
+ </platform>
 </plugin>
