@@ -33,7 +33,7 @@ window.Calendar.deleteEvent(title, location, notes, startDate, endDate,
 function() {console.log('success');}, 
 function() {console.log('fail');});
 ```
-2. **Find Event**
+3. **Find Event**
 
 ```js
 var title = "title";
