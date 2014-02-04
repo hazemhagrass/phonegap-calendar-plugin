@@ -9,6 +9,8 @@ This Plugin can create or delete event in native calendar for iOS and Android De
 
 Example Usage: 
 
+1. **Create Event**
+
 ```js
 var title = "title";
 var location = "location";
@@ -16,12 +18,16 @@ var notes = "notes";
 var startDate = new Date(2104,5,5,10,30);
 var endDate = new Date(2104,5,5,20,30);
 window.Calendar.createEvent(title, location, notes, startDate, endDate, 
-function() {
-			console.log('success');
-		}, 
-function() {
-			console.log('fail');
-});
+function() {console.log('success');}, 
+function() {console.log('fail');});
+```
+2. **Delete Event**
+
+```js
+var title = "title";
+window.Calendar.deleteEvent(title,
+function() {console.log('success');}, 
+function() {console.log('fail');});
 ```
 
 This has been successfully tested on Cordova 3.0 to 3.1.
