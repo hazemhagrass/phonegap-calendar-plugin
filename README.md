@@ -9,7 +9,7 @@ This Plugin can create or delete event in native Calendar for iOS and Android De
 
 Example Usage: 
 
-1. **Create Event**
+1- **Create Event**
 
 ```js
 var title = "title";
@@ -21,7 +21,8 @@ window.Calendar.createEvent(title, location, notes, startDate, endDate,
 function() {console.log('success');}, 
 function() {console.log('fail');});
 ```
-2. **Delete Event**
+
+2- **Delete Event**
 
 ```js
 var title = "title";
@@ -33,7 +34,8 @@ window.Calendar.deleteEvent(title, location, notes, startDate, endDate,
 function() {console.log('success');}, 
 function() {console.log('fail');});
 ```
-3. **Find Event**
+
+3- **Find Event**
 
 ```js
 var title = "title";
