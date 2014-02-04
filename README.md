@@ -1,7 +1,7 @@
 Calendar plugin for Cordova / PhoneGap
 ======================================================
 
-This Plugin is inspired from [here](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin)
+This Plugin is inspired from [here](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin) and [here] (https://github.com/twistandshout/phonegap-calendar-plugin)
 
 This Plugin can create or delete event in native Calendar for iOS and Android Devices, you can also find all events for specific date.
 
