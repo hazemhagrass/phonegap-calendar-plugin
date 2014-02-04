@@ -1,64 +1,33 @@
-# Android Calendar Plugin for PhoneGap #
+Calendar plugin for Cordova / PhoneGap
+======================================================
 
-This plugin is tested on Gingerbread (Samsung Galaxy S2) and Jellybean. Since there is no official Calendar API before Ice Cream Sandwich, your mileage may vary for older Androids.
+This Plugin is inspired from [here](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin)
 
-## Adding the Plugin to your project ##
+This Plugin can create or delete event in native calendar for iOS and Android Devices, you can also find all events for specific date.
 
-Either:
+## Usage
 
-1. Copy `calendar.js` to your project's `www` folder and include a reference to it in your html files.
-2. Create `src/com/twist/android/plugins/calendar` in your project and move the java files into it.
-
-Or use pluginstall: https://github.com/alunny/pluginstall
-
-## JavaScript API ##
-
-This plugin attempts to confirm to the W3C Calendar API (http://dev.w3.org/2009/dap/calendar/). Currently only `findEvents` is implemented.
-
-Get the plugin object with `cordova.require('cordova/plugin/calendar')`.
-
-### findEvents ###
-`findEvents(successCb, errorCb, filter)`
-
-Find calendar events from active calendars.
+Example Usage: 
 
 ```js
-var later = new Date();
-later.setDate(later.getDate() + 3); // 3 days from now
-  
-cordova.require('cordova/plugin/calendar').findEvents(function(events) {
-  // Do something with returned events array.
-}, function() {
-  // There's an error for some reason.
-}, {
-  'startAfter': new Date().getTime(),
-  'startBefore': later.getTime()
+var title = "title";
+var location = "location";
+var notes = "notes";
+var startDate = new Date(2104,5,5,10,30);
+var endDate = new Date(2104,5,5,20,30);
+window.Calendar.createEvent(title, location, notes, startDate, endDate, 
+function() {
+			console.log('success');
+		}, 
+function() {
+			console.log('fail');
 });
 ```
 
-## JavaScript Object Format ##
+This has been successfully tested on Cordova 3.0 to 3.1.
 
-### Calendar Event ###
+This plugin is tested on Gingerbread (Samsung Galaxy S2) and Jellybean. Since there is no official Calendar API before Ice Cream Sandwich, your mileage may vary for older Androids.
 
-A calendar event may have the following attributes:
-
-* `id` Unique identifier. Required,
-* `description` Event description. Optional.
-* `location` Event location. Optional.
-* `summary` Event summary. Optional.
-* `start` Event start time in a UTC time string (http://www.ietf.org/rfc/rfc3339.txt). Optional.
-* `end` Event end time in a UTC time string (http://www.ietf.org/rfc/rfc3339.txt). Optional.
-* `Xallday` True for all day events. Required.
-* `Xattendees` Array of attendees. Optional.
-
-### Attendee ###
-
-An attendee may have the following attributes:
-
-* `id` Unique identifier for the event. Required.
-* `name` Attendee name. Optional.
-* `email` Attendee email. Optional.
-* `status` Attendee acceptance status. 0 = none, 1 = accepted, 2 = declined, 3 = invited, 4 = tentative.
 
 ## Licence ##
 
