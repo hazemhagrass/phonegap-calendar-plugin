@@ -30,9 +30,13 @@
  * @author yvonne@twist.com (Yvonne Yip)
  */
 
-package com.twist.android.plugins.calendar;
+package com.badrit.Calendar;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.database.Cursor;
+import android.net.Uri;
+import android.provider.CalendarContract;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -44,7 +48,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.apache.cordova.api.CordovaInterface;
+import org.apache.cordova.CordovaInterface;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,6 +57,17 @@ import org.json.JSONObject;
 public abstract class AbstractCalendarAccessor {
 
   public static final String LOG_TAG = "Calendar";
+  public static final String CONTENT_PROVIDER =
+  "content://com.android.calendar";
+  public static final String CONTENT_PROVIDER_PRE_FROYO =
+  "content://calendar";
+
+  public static final String CONTENT_PROVIDER_PATH_CALENDARS = "/calendars";
+  public static final String CONTENT_PROVIDER_PATH_EVENTS = "/events";
+  public static final String CONTENT_PROVIDER_PATH_REMINDERS = "/reminders";
+  public static final String CONTENT_PROVIDER_PATH_INSTANCES_WHEN =
+  "/instances/when";
+  public static final String CONTENT_PROVIDER_PATH_ATTENDEES = "/attendees";
 
   protected static class Event {
     String id;
@@ -161,14 +176,14 @@ public abstract class AbstractCalendarAccessor {
   }
 
   protected abstract Cursor queryAttendees(String[] projection,
-      String selection, String[] selectionArgs, String sortOrder);
+    String selection, String[] selectionArgs, String sortOrder);
   protected abstract Cursor queryCalendars(String[] projection,
-      String selection, String[] selectionArgs, String sortOrder);
+    String selection, String[] selectionArgs, String sortOrder);
   protected abstract Cursor queryEvents(String[] projection,
-      String selection, String[] selectionArgs, String sortOrder);
+    String selection, String[] selectionArgs, String sortOrder);
   protected abstract Cursor queryEventInstances(long startFrom, long startTo,
-      String[] projection, String selection, String[] selectionArgs,
-      String sortOrder);
+    String[] projection, String selection, String[] selectionArgs,
+    String sortOrder);
 
   private Event[] fetchEventInstances(long startFrom, long startTo) {
     String[] projection = {
@@ -178,17 +193,17 @@ public abstract class AbstractCalendarAccessor {
       this.getKey(KeyIndex.INSTANCES_END)
     };
     String sortOrder = this.getKey(KeyIndex.INSTANCES_BEGIN) + " ASC, " +
-      this.getKey(KeyIndex.INSTANCES_END) + " ASC";
+    this.getKey(KeyIndex.INSTANCES_END) + " ASC";
     // Fetch events from instances table in ascending order by time.
     Cursor cursor = queryEventInstances(startFrom, startTo, projection, null,
-        null, sortOrder);
+      null, sortOrder);
     Event[] instances = null;
     if (cursor.moveToFirst()) {
       int idCol = cursor.getColumnIndex(this.getKey(KeyIndex.INSTANCES_ID));
       int eventIdCol = cursor.getColumnIndex(this.getKey(
-            KeyIndex.INSTANCES_EVENT_ID));
+        KeyIndex.INSTANCES_EVENT_ID));
       int beginCol = cursor.getColumnIndex(this.getKey(
-            KeyIndex.INSTANCES_BEGIN));
+        KeyIndex.INSTANCES_BEGIN));
       int endCol = cursor.getColumnIndex(this.getKey(KeyIndex.INSTANCES_END));
       int count = cursor.getCount();
       int i = 0;
@@ -211,8 +226,8 @@ public abstract class AbstractCalendarAccessor {
   private String[] getActiveCalendarIds() {
     // Get only active calendars.
     Cursor cursor = queryCalendars(new String[]{this.getKey(
-          KeyIndex.CALENDARS_ID)},
-        this.getKey(KeyIndex.CALENDARS_VISIBLE) + "=1", null, null);
+      KeyIndex.CALENDARS_ID)},
+    this.getKey(KeyIndex.CALENDARS_VISIBLE) + "=1", null, null);
     String[] calendarIds = null;
     if (cursor.moveToFirst()) {
       calendarIds = new String[cursor.getCount()];
@@ -248,118 +263,159 @@ public abstract class AbstractCalendarAccessor {
     // Get all the ids at once from active calendars.
     StringBuffer select = new StringBuffer();
     select.append(this.getKey(KeyIndex.EVENTS_ID) + " IN (");
-    select.append(instances[0].eventId);
-    for (int i = 1; i < instances.length; i++) {
-      select.append(",");
-      select.append(instances[i].eventId);
-    }
-    select.append(") AND " + this.getKey(KeyIndex.EVENTS_CALENDAR_ID) +
-        " IN (");
-    select.append(activeCalendarIds[0]);
-    for (int i = 1; i < activeCalendarIds.length; i++) {
-      select.append(",");
-      select.append(activeCalendarIds[i]);
-    }
-    select.append(")");
-    Cursor cursor = queryEvents(projection, select.toString(), null, null);
-    Map<String, Event> eventsMap = new HashMap<String, Event>();
-    if (cursor.moveToFirst()) {
-      int[] cols = new int[projection.length];
-      for (int i = 0; i < cols.length; i++) {
-        cols[i] = cursor.getColumnIndex(projection[i]);
+      select.append(instances[0].eventId);
+      for (int i = 1; i < instances.length; i++) {
+        select.append(",");
+        select.append(instances[i].eventId);
       }
-      do {
-        Event event = new Event();
-        event.id = cursor.getString(cols[0]);
-        event.description = cursor.getString(cols[1]);
-        event.location = cursor.getString(cols[2]);
-        event.summary = cursor.getString(cols[3]);
-        event.start = cursor.getString(cols[4]);
-        event.end = cursor.getString(cols[5]);
-        event.recurring = !TextUtils.isEmpty(cursor.getString(cols[6]));
-        event.allDay = cursor.getInt(cols[7]) != 0;
-        eventsMap.put(event.id, event);
-      } while (cursor.moveToNext());
+      select.append(") AND " + this.getKey(KeyIndex.EVENTS_CALENDAR_ID) +
+      " IN (");
+      select.append(activeCalendarIds[0]);
+      for (int i = 1; i < activeCalendarIds.length; i++) {
+        select.append(",");
+        select.append(activeCalendarIds[i]);
+      }
+      select.append(")");
+      Cursor cursor = queryEvents(projection, select.toString(), null, null);
+      Map<String, Event> eventsMap = new HashMap<String, Event>();
+      if (cursor.moveToFirst()) {
+        int[] cols = new int[projection.length];
+        for (int i = 0; i < cols.length; i++) {
+          cols[i] = cursor.getColumnIndex(projection[i]);
+        }
+        do {
+          Event event = new Event();
+          event.id = cursor.getString(cols[0]);
+          event.description = cursor.getString(cols[1]);
+          event.location = cursor.getString(cols[2]);
+          event.summary = cursor.getString(cols[3]);
+          event.start = cursor.getString(cols[4]);
+          event.end = cursor.getString(cols[5]);
+          event.recurring = !TextUtils.isEmpty(cursor.getString(cols[6]));
+          event.allDay = cursor.getInt(cols[7]) != 0;
+          eventsMap.put(event.id, event);
+        } while (cursor.moveToNext());
+      }
+      return eventsMap;
     }
-    return eventsMap;
-  }
 
-  private Map<String, ArrayList<Attendee>> fetchAttendeesForEventsAsMap(
+    private Map<String, ArrayList<Attendee>> fetchAttendeesForEventsAsMap(
       String[] eventIds) {
     // At least one id.
-    if (eventIds.length == 0) {
-      return null;
-    }
-    String[] projection = new String[]{
-      this.getKey(KeyIndex.ATTENDEES_EVENT_ID),
-      this.getKey(KeyIndex.ATTENDEES_ID),
-      this.getKey(KeyIndex.ATTENDEES_NAME),
-      this.getKey(KeyIndex.ATTENDEES_EMAIL),
-      this.getKey(KeyIndex.ATTENDEES_STATUS)
-    };
-    StringBuffer select = new StringBuffer();
-    select.append(this.getKey(KeyIndex.ATTENDEES_EVENT_ID) + " IN (");
-    select.append(eventIds[0]);
-    for (int i = 1; i < eventIds.length; i++) {
-      select.append(",");
-      select.append(eventIds[i]);
-    }
-    select.append(")");
-    // Group the events together for easy iteration.
-    Cursor cursor = queryAttendees(projection, select.toString(), null,
-        this.getKey(KeyIndex.ATTENDEES_EVENT_ID) + " ASC");
-    Map<String, ArrayList<Attendee>> attendeeMap =
-        new HashMap<String, ArrayList<Attendee>>();
-    if (cursor.moveToFirst()) {
-      int[] cols = new int[projection.length];
-      for (int i = 0; i < cols.length; i++) {
-        cols[i] = cursor.getColumnIndex(projection[i]);
+      if (eventIds.length == 0) {
+        return null;
       }
-      ArrayList<Attendee> array = null;
-      String currentEventId = null;
-      do {
-        String eventId = cursor.getString(cols[0]);
-        if (currentEventId == null || !currentEventId.equals(eventId)) {
-          currentEventId = eventId;
-          array = new ArrayList<Attendee>();
-          attendeeMap.put(currentEventId, array);
+      String[] projection = new String[]{
+        this.getKey(KeyIndex.ATTENDEES_EVENT_ID),
+        this.getKey(KeyIndex.ATTENDEES_ID),
+        this.getKey(KeyIndex.ATTENDEES_NAME),
+        this.getKey(KeyIndex.ATTENDEES_EMAIL),
+        this.getKey(KeyIndex.ATTENDEES_STATUS)
+      };
+      StringBuffer select = new StringBuffer();
+      select.append(this.getKey(KeyIndex.ATTENDEES_EVENT_ID) + " IN (");
+        select.append(eventIds[0]);
+        for (int i = 1; i < eventIds.length; i++) {
+          select.append(",");
+          select.append(eventIds[i]);
         }
-        Attendee attendee = new Attendee();
-        attendee.id = cursor.getString(cols[1]);
-        attendee.name = cursor.getString(cols[2]);
-        attendee.email = cursor.getString(cols[3]);
-        attendee.status = cursor.getString(cols[4]);
-        array.add(attendee);
-      } while (cursor.moveToNext());
-    }
-    return attendeeMap;
-  }
+        select.append(")");
+    // Group the events together for easy iteration.
+        Cursor cursor = queryAttendees(projection, select.toString(), null,
+          this.getKey(KeyIndex.ATTENDEES_EVENT_ID) + " ASC");
+        Map<String, ArrayList<Attendee>> attendeeMap =
+        new HashMap<String, ArrayList<Attendee>>();
+        if (cursor.moveToFirst()) {
+          int[] cols = new int[projection.length];
+          for (int i = 0; i < cols.length; i++) {
+            cols[i] = cursor.getColumnIndex(projection[i]);
+          }
+          ArrayList<Attendee> array = null;
+          String currentEventId = null;
+          do {
+            String eventId = cursor.getString(cols[0]);
+            if (currentEventId == null || !currentEventId.equals(eventId)) {
+              currentEventId = eventId;
+              array = new ArrayList<Attendee>();
+              attendeeMap.put(currentEventId, array);
+            }
+            Attendee attendee = new Attendee();
+            attendee.id = cursor.getString(cols[1]);
+            attendee.name = cursor.getString(cols[2]);
+            attendee.email = cursor.getString(cols[3]);
+            attendee.status = cursor.getString(cols[4]);
+            array.add(attendee);
+          } while (cursor.moveToNext());
+        }
+        return attendeeMap;
+      }
 
-  public JSONArray findEvents(long startFrom, long startTo) {
+      public JSONArray findEvents(long startFrom, long startTo) {
     // Fetch events from the instance table.
-    Event[] instances = fetchEventInstances(startFrom, startTo);
+        Event[] instances = fetchEventInstances(startFrom, startTo);
     // Fetch events from the events table for more event info.
-    Map<String, Event> eventMap = fetchEventsAsMap(instances);
+        Map<String, Event> eventMap = fetchEventsAsMap(instances);
     // Fetch event attendees
-    Map<String, ArrayList<Attendee>> attendeeMap =
+        Map<String, ArrayList<Attendee>> attendeeMap =
         fetchAttendeesForEventsAsMap(eventMap.keySet().toArray(new String[0]));
     // Merge the event info with the instances and turn it into a JSONArray.
-    JSONArray result = new JSONArray();
-    for (Event instance : instances) {
-      Event event = eventMap.get(instance.eventId);
-      if (event != null) {
-        instance.description = event.description;
-        instance.location = event.location;
-        instance.summary = event.summary;
-        if (!event.recurring) {
-          instance.start = event.start;
-          instance.end = event.end;
+        JSONArray result = new JSONArray();
+        for (Event instance : instances) {
+          Event event = eventMap.get(instance.eventId);
+          if (event != null) {
+            instance.description = event.description;
+            instance.location = event.location;
+            instance.summary = event.summary;
+            if (!event.recurring) {
+              instance.start = event.start;
+              instance.end = event.end;
+            }
+            instance.allDay = event.allDay;
+            instance.attendees = attendeeMap.get(instance.eventId);
+            result.put(instance.toJSONObject());
+          }
         }
-        instance.allDay = event.allDay;
-        instance.attendees = attendeeMap.get(instance.eventId);
-        result.put(instance.toJSONObject());
+        return result;
+      }
+
+      public boolean deleteEvent(Uri eventsUri, String title){
+        ContentResolver resolver = this.cordova.getActivity().getApplicationContext().getContentResolver();
+        String where = "title=?";
+        String[] args = new String[] { title };
+        int numOfDeletedRecords = resolver.delete(eventsUri, where, args );
+
+        if(numOfDeletedRecords > 0)
+          return true;
+        else
+          return false;
+      }
+
+      public boolean createEvent(Uri eventsUri, String title, long startTime, long endTime,
+        String description, String location){
+
+        try{
+          ContentResolver cr = this.cordova.getActivity().getContentResolver();
+          ContentValues values = new ContentValues();
+          values.put(CalendarContract.Events.DTSTART, startTime);
+          values.put(CalendarContract.Events.DTEND, endTime);
+          values.put(CalendarContract.Events.TITLE, title);
+          values.put(CalendarContract.Events.DESCRIPTION, description);
+          values.put(CalendarContract.Events.HAS_ALARM, 1);
+          values.put(CalendarContract.Events.CALENDAR_ID, 1);
+          values.put(CalendarContract.Events.EVENT_TIMEZONE, TimeZone.getDefault().getID());
+          values.put(CalendarContract.Events.EVENT_LOCATION, location);
+          Uri uri = cr.insert(eventsUri, values);
+
+          ContentValues reminderValues = new ContentValues();
+          reminderValues.put("event_id", Long.parseLong(uri.getLastPathSegment()));
+          reminderValues.put("minutes", 5); 
+          reminderValues.put("method", 1);
+          Uri reminderUri = cr.insert(Uri.parse(CONTENT_PROVIDER + CONTENT_PROVIDER_PATH_REMINDERS), reminderValues);
+        }catch(Exception e){
+          Log.e("Calendar", e.getMessage());
+          return false;
+        }
+        
+        return true;
       }
     }
-    return result;
-  }
-}

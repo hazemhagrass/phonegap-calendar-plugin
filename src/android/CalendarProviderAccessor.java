@@ -30,7 +30,7 @@
  * @author yvonne@twist.com (Yvonne Yip)
  */
 
-package com.twist.android.plugins.calendar;
+package com.badrit.Calendar;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -47,11 +47,12 @@ import android.provider.CalendarContract.Instances;
 
 import android.util.Log;
 
+import java.net.URI;
 import java.util.EnumMap;
 
-import com.twist.android.plugins.calendar.AbstractCalendarAccessor;
+import com.badrit.Calendar.AbstractCalendarAccessor;
 
-import org.apache.cordova.api.CordovaInterface;
+import org.apache.cordova.CordovaInterface;
 
 public class CalendarProviderAccessor extends AbstractCalendarAccessor {
 
@@ -62,7 +63,7 @@ public class CalendarProviderAccessor extends AbstractCalendarAccessor {
   @Override
   protected EnumMap<KeyIndex, String> initContentProviderKeys() {
     EnumMap<KeyIndex, String> keys = new EnumMap<KeyIndex, String>(
-        KeyIndex.class);
+      KeyIndex.class);
     keys.put(KeyIndex.CALENDARS_ID, Calendars._ID);
     keys.put(KeyIndex.CALENDARS_VISIBLE, Calendars.VISIBLE);
     keys.put(KeyIndex.EVENTS_ID, Events._ID);
@@ -88,36 +89,50 @@ public class CalendarProviderAccessor extends AbstractCalendarAccessor {
 
   @Override
   protected Cursor queryAttendees(String[] projection, String selection,
-      String[] selectionArgs, String sortOrder) {
+    String[] selectionArgs, String sortOrder) {
     return this.cordova.getActivity().getContentResolver().query(
-        Attendees.CONTENT_URI, projection, selection, selectionArgs,
-        sortOrder);
+      Attendees.CONTENT_URI, projection, selection, selectionArgs,
+      sortOrder);
   }
 
   @Override
   protected Cursor queryCalendars(String[] projection, String selection,
-      String[] selectionArgs, String sortOrder) {
+    String[] selectionArgs, String sortOrder) {
     return this.cordova.getActivity().getContentResolver().query(
-        Calendars.CONTENT_URI, projection, selection, selectionArgs,
-        sortOrder);
+      Calendars.CONTENT_URI, projection, selection, selectionArgs,
+      sortOrder);
   }
 
   @Override
   protected Cursor queryEvents(String[] projection, String selection,
-      String[] selectionArgs, String sortOrder) {
+    String[] selectionArgs, String sortOrder) {
     return this.cordova.getActivity().getContentResolver().query(
-        Events.CONTENT_URI, projection, selection, selectionArgs, sortOrder);
+      Events.CONTENT_URI, projection, selection, selectionArgs, sortOrder);
   }
 
   @Override
   protected Cursor queryEventInstances(long startFrom, long startTo,
-      String[] projection, String selection, String[] selectionArgs,
-      String sortOrder) {
+    String[] projection, String selection, String[] selectionArgs,
+    String sortOrder) {
     Uri.Builder builder = Instances.CONTENT_URI.buildUpon();
     ContentUris.appendId(builder, startFrom);
     ContentUris.appendId(builder, startTo);
     return this.cordova.getActivity().getContentResolver().query(
-        builder.build(), projection, selection, selectionArgs, sortOrder);
+      builder.build(), projection, selection, selectionArgs, sortOrder);
   }
+  
+  @Override
+  public boolean deleteEvent(Uri eventsUri, String title){
+   eventsUri = eventsUri == null ? Uri.parse(CONTENT_PROVIDER + CONTENT_PROVIDER_PATH_EVENTS) : eventsUri;
+   return super.deleteEvent(eventsUri, title);
+ }
 
+ @Override
+ public boolean createEvent(Uri eventsUri, String title, long startTime, long endTime,
+        String description, String location){
+
+   eventsUri = eventsUri == null ? Uri.parse(CONTENT_PROVIDER + CONTENT_PROVIDER_PATH_EVENTS) : eventsUri;
+   return super.createEvent(eventsUri, title, startTime, endTime,
+        description, location);
+ }
 }

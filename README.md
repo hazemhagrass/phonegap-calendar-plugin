@@ -1,88 +1,75 @@
-# Android Calendar Plugin for PhoneGap #
+Calendar plugin for Cordova / PhoneGap
+======================================================
 
-This plugin is tested on Gingerbread (Samsung Galaxy S2) and Jellybean. Since there is no official Calendar API before Ice Cream Sandwich, your mileage may vary for older Androids.
+This Plugin is inspired from [here](https://github.com/EddyVerbruggen/Calendar-PhoneGap-Plugin) and [here] (https://github.com/twistandshout/phonegap-calendar-plugin)
 
-## Adding the Plugin to your project ##
+This Plugin can create or delete event in native Calendar for iOS and Android Devices, you can also find all events for specific date.
 
-Either:
+## Usage
 
-1. Copy `calendar.js` to your project's `www` folder and include a reference to it in your html files.
-2. Create `src/com/twist/android/plugins/calendar` in your project and move the java files into it.
+Example Usage: 
 
-Or use pluginstall: https://github.com/alunny/pluginstall
-
-## JavaScript API ##
-
-This plugin attempts to confirm to the W3C Calendar API (http://dev.w3.org/2009/dap/calendar/). Currently only `findEvents` is implemented.
-
-Get the plugin object with `cordova.require('cordova/plugin/calendar')`.
-
-### findEvents ###
-`findEvents(successCb, errorCb, filter)`
-
-Find calendar events from active calendars.
+1- **Create Event**
 
 ```js
-var later = new Date();
-later.setDate(later.getDate() + 3); // 3 days from now
-  
-cordova.require('cordova/plugin/calendar').findEvents(function(events) {
-  // Do something with returned events array.
-}, function() {
-  // There's an error for some reason.
-}, {
-  'startAfter': new Date().getTime(),
-  'startBefore': later.getTime()
-});
+var title = "title";
+var location = "location";
+var notes = "notes";
+var startDate = new Date(2104,5,5,10,30);
+var endDate = new Date(2104,5,5,20,30);
+window.Calendar.createEvent(title, location, notes, startDate, endDate, 
+function() {console.log('success');}, 
+function() {console.log('fail');});
 ```
 
-## JavaScript Object Format ##
+2- **Delete Event**
 
-### Calendar Event ###
-
-A calendar event may have the following attributes:
-
-* `id` Unique identifier. Required,
-* `description` Event description. Optional.
-* `location` Event location. Optional.
-* `summary` Event summary. Optional.
-* `start` Event start time in a UTC time string (http://www.ietf.org/rfc/rfc3339.txt). Optional.
-* `end` Event end time in a UTC time string (http://www.ietf.org/rfc/rfc3339.txt). Optional.
-* `Xallday` True for all day events. Required.
-* `Xattendees` Array of attendees. Optional.
-
-### Attendee ###
-
-An attendee may have the following attributes:
-
-* `id` Unique identifier for the event. Required.
-* `name` Attendee name. Optional.
-* `email` Attendee email. Optional.
-* `status` Attendee acceptance status. 0 = none, 1 = accepted, 2 = declined, 3 = invited, 4 = tentative.
-
-## Licence ##
-
+```js
+var title = "title";
+var location = "location";
+var notes = "notes";
+var startDate = new Date(2104,5,5,10,30);
+var endDate = new Date(2104,5,5,20,30);
+window.Calendar.deleteEvent(title, location, notes, startDate, endDate,
+function() {console.log('success');}, 
+function() {console.log('fail');});
 ```
-Copyright (c) 2012, Twist and Shout, Inc. http://www.twist.com/
-All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met: 
+3- **Find Event**
 
-1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
-2. Redistributions in binary form must reproduce the above copyright notice,
-   this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution. 
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```js
+var title = "title";
+var location = "location";
+var notes = "notes";
+var startDate = new Date(2104,5,5,10,30);
+var endDate = new Date(2104,5,5,20,30);
+window.Calendar.findEvents(title, location, notes, startDate, endDate,
+function(events) {console.log('success');}, 
+function() {console.log('fail');});
 ```
+
+This has been successfully tested on Cordova 3.0 to 3.1.
+
+
+## MIT Licence
+
+Copyright 2013 Monday Consulting GmbH
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

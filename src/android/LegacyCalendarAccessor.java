@@ -30,18 +30,20 @@
  * @author yvonne@twist.com (Yvonne Yip)
  */
 
-package com.twist.android.plugins.calendar;
+package com.badrit.Calendar;
 
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 
-import com.twist.android.plugins.calendar.AbstractCalendarAccessor;
+import com.badrit.Calendar.AbstractCalendarAccessor;
 
 import java.util.EnumMap;
 
-import org.apache.cordova.api.CordovaInterface;
+import org.apache.cordova.CordovaInterface;
 
 public class LegacyCalendarAccessor extends AbstractCalendarAccessor {
 
@@ -52,7 +54,7 @@ public class LegacyCalendarAccessor extends AbstractCalendarAccessor {
   @Override
   protected EnumMap<KeyIndex, String> initContentProviderKeys() {
     EnumMap<KeyIndex, String> keys = new EnumMap<KeyIndex, String>(
-        KeyIndex.class);
+      KeyIndex.class);
     keys.put(KeyIndex.CALENDARS_ID, "_id");
     keys.put(KeyIndex.CALENDARS_VISIBLE, "selected");
     keys.put(KeyIndex.EVENTS_ID, "_id");
@@ -76,17 +78,6 @@ public class LegacyCalendarAccessor extends AbstractCalendarAccessor {
     return keys;
   };
 
-  private static final String CONTENT_PROVIDER =
-    "content://com.android.calendar";
-  private static final String CONTENT_PROVIDER_PRE_FROYO =
-    "content://calendar";
-
-  private static final String CONTENT_PROVIDER_PATH_CALENDARS = "/calendars";
-  private static final String CONTENT_PROVIDER_PATH_EVENTS = "/events";
-  private static final String CONTENT_PROVIDER_PATH_INSTANCES_WHEN =
-      "/instances/when";
-  private static final String CONTENT_PROVIDER_PATH_ATTENDEES = "/attendees";
-
   private String getContentProviderUri(String path) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
       return CONTENT_PROVIDER + path;
@@ -97,36 +88,50 @@ public class LegacyCalendarAccessor extends AbstractCalendarAccessor {
 
   @Override
   protected Cursor queryAttendees(String[] projection, String selection,
-      String[] selectionArgs, String sortOrder) {
+    String[] selectionArgs, String sortOrder) {
     String uri = getContentProviderUri(CONTENT_PROVIDER_PATH_ATTENDEES);
     return this.cordova.getActivity().managedQuery(Uri.parse(uri), projection,
-        selection, selectionArgs, sortOrder);
+      selection, selectionArgs, sortOrder);
   }
 
   @Override
   protected Cursor queryCalendars(String[] projection, String selection,
-      String[] selectionArgs, String sortOrder) {
+    String[] selectionArgs, String sortOrder) {
     String uri = getContentProviderUri(CONTENT_PROVIDER_PATH_CALENDARS);
     return this.cordova.getActivity().managedQuery(Uri.parse(uri), projection,
-        selection, selectionArgs, sortOrder);
+      selection, selectionArgs, sortOrder);
   }
 
   @Override
   protected Cursor queryEvents(String[] projection, String selection,
-      String[] selectionArgs, String sortOrder) {
+    String[] selectionArgs, String sortOrder) {
     String uri = getContentProviderUri(CONTENT_PROVIDER_PATH_EVENTS);
     return this.cordova.getActivity().managedQuery(Uri.parse(uri), projection,
-        selection, selectionArgs, sortOrder);
+      selection, selectionArgs, sortOrder);
   }
 
   @Override
   protected Cursor queryEventInstances(long startFrom, long startTo,
-      String[] projection, String selection, String[] selectionArgs,
-      String sortOrder) {
+    String[] projection, String selection, String[] selectionArgs,
+    String sortOrder) {
     String uri = getContentProviderUri(CONTENT_PROVIDER_PATH_INSTANCES_WHEN) +
-        "/" + Long.toString(startFrom) + "/" + Long.toString(startTo);
+    "/" + Long.toString(startFrom) + "/" + Long.toString(startTo);
     return this.cordova.getActivity().managedQuery(Uri.parse(uri), projection,
-        selection, selectionArgs, sortOrder);
+      selection, selectionArgs, sortOrder);
   }
+  
+  @Override
+  public boolean deleteEvent(Uri eventsUri, String title){
+   eventsUri = eventsUri == null ? Uri.parse(CONTENT_PROVIDER_PRE_FROYO + CONTENT_PROVIDER_PATH_EVENTS) : eventsUri;
+   return super.deleteEvent(eventsUri, title);
+ }
+
+ @Override
+ public boolean createEvent(Uri eventsUri, String title, long startTime, long endTime,
+  String description, String location){
+   eventsUri = eventsUri == null ? Uri.parse(CONTENT_PROVIDER_PRE_FROYO + CONTENT_PROVIDER_PATH_EVENTS) : eventsUri;
+   return super.createEvent(eventsUri, title, startTime, endTime,
+    description, location);
+ }
 
 }
